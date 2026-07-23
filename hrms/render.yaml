@@ -1,0 +1,42 @@
+# Render Blueprint - deploys backend + Postgres in one go.
+# In Render dashboard: New -> Blueprint -> select this repo -> Render reads this file automatically.
+databases:
+  - name: hrms-db
+    databaseName: hrms_db
+    plan: free
+
+services:
+  - type: web
+    name: hrms-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: hrms-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: hrms-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: hrms-db
+          property: password
+      - key: APP_CORS_ORIGINS
+        sync: false   # set manually after the frontend is deployed (its URL)
+
+  - type: web
+    name: hrms-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false   # set manually to https://hrms-backend.onrender.com/api after backend deploys
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

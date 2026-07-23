@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 spring:
   application:
@@ -55,6 +55,11 @@ app:
     refresh-expiration-ms: 604800000  # 7d refresh token
   upload:
     dir: uploads/profile-images
+  cors:
+    # Comma-separated list of allowed frontend origins.
+    # Locally this defaults to Vite's dev servers; in production, set the
+    # APP_CORS_ORIGINS env var to your deployed frontend URL(s).
+    allowed-origins: ${APP_CORS_ORIGINS:http://localhost:5173,http://localhost:3000}
 
 springdoc:
   swagger-ui:
